@@ -1,30 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
+using Motocicleta.Data;
 using Motocicleta.Model;
 
 namespace Motocicleta.Controllers
 {
     [ApiController]
-    [Route("{Controller}")]
+    [Route("[Controller]")]
     public class MotoConquistadaController : ControllerBase
     {
-        private static List<MotoConquistada> MotoConquistadas = new List<MotoConquistada>();
+        private static List<MotoConquistada> motoConquistadaList = new List<MotoConquistada>();
+        private readonly Context _context;
+
+        public MotoConquistadaController(Context context)
+        {
+            _context = context;
+        }
 
         [HttpPost]
-        public void addMotoConquistada([FromBody] MotoConquistada conquista)
+        public void AddMoto([FromBody] MotoConquistada moto)
         {
-            MotoConquistadas.Add(conquista);
+            _context.MotoConquistada.Add(moto);
+            _context.SaveChanges();
         }
 
         [HttpGet]
         public IActionResult GetMotoConquistada()
         {
-            return Ok(MotoConquistadas);
+            return Ok(_context.MotoConquistada.ToList());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetMotoConquistadaById(int id)
+        public ActionResult GetMotoConquistadaById(int id)
         {
-            MotoConquistada motoConquistada = MotoConquistadas.FirstOrDefault(motosConquistada => motosConquistada.Id == id);
+            MotoConquistada motoConquistada = _context.MotoConquistada.FirstOrDefault(motoConquistada => motoConquistada.Id == id);
             if (motoConquistada != null)
             {
                 return Ok(motoConquistada);
@@ -32,6 +40,17 @@ namespace Motocicleta.Controllers
             else
             {
                 return NotFound();
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public void Deletar(int id)
+        {
+            var motoConquistada = _context.MotoConquistada.FirstOrDefault(motoConquistada => motoConquistada.Id == id);
+            if(motoConquistada != null)
+            {
+                _context.MotoConquistada.Remove(motoConquistada);
+                _context.SaveChanges();
             }
         }
     }
